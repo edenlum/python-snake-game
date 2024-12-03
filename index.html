@@ -68,6 +68,8 @@
             {x: 280, y: 240}
         ];
         let direction = 'right';
+        let moveQueue = [];
+        let lastProcessedDirection = 'right';
         let food = generateFood();
         let score = 0;
         let gameLoop;
@@ -92,7 +94,21 @@
             ctx.fillRect(food.x, food.y, GRID_SIZE - 2, GRID_SIZE - 2);
         }
 
+        function isValidMove(newDir, currentDir) {
+            if (newDir === 'up' && currentDir === 'down') return false;
+            if (newDir === 'down' && currentDir === 'up') return false;
+            if (newDir === 'left' && currentDir === 'right') return false;
+            if (newDir === 'right' && currentDir === 'left') return false;
+            return true;
+        }
+
         function moveSnake() {
+            // Process next direction from queue
+            if (moveQueue.length > 0 && isValidMove(moveQueue[0], lastProcessedDirection)) {
+                direction = moveQueue.shift();
+                lastProcessedDirection = direction;
+            }
+
             const head = {x: snake[0].x, y: snake[0].y};
 
             switch(direction) {
@@ -141,6 +157,8 @@
                 {x: 280, y: 240}
             ];
             direction = 'right';
+            lastProcessedDirection = 'right';
+            moveQueue = [];
             score = 0;
             document.getElementById('score').textContent = 'Score: 0';
             document.getElementById('game-over').style.display = 'none';
@@ -154,10 +172,24 @@
             if (gameOver) return;
             
             const key = event.key;
-            if (key === 'ArrowUp' && direction !== 'down') direction = 'up';
-            if (key === 'ArrowDown' && direction !== 'up') direction = 'down';
-            if (key === 'ArrowLeft' && direction !== 'right') direction = 'left';
-            if (key === 'ArrowRight' && direction !== 'left') direction = 'right';
+            let newDirection = direction;
+
+            if (key === 'ArrowUp') newDirection = 'up';
+            else if (key === 'ArrowDown') newDirection = 'down';
+            else if (key === 'ArrowLeft') newDirection = 'left';
+            else if (key === 'ArrowRight') newDirection = 'right';
+            else return;
+
+            // Only add to queue if it's different from the last queued direction
+            if (moveQueue.length === 0) {
+                if (isValidMove(newDirection, lastProcessedDirection)) {
+                    moveQueue.push(newDirection);
+                }
+            } else if (newDirection !== moveQueue[moveQueue.length - 1]) {
+                if (isValidMove(newDirection, moveQueue[moveQueue.length - 1])) {
+                    moveQueue.push(newDirection);
+                }
+            }
         });
 
         resetGame();
