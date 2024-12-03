@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang=\"en\">
+<html lang="en">
 <head>
-    <meta charset=\"UTF-8\">
-    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Snake Game</title>
     <style>
         body {
@@ -48,12 +48,12 @@
     </style>
 </head>
 <body>
-    <div id=\"score\">Score: 0</div>
-    <canvas id=\"gameCanvas\" width=\"640\" height=\"480\"></canvas>
-    <div id=\"game-over\">
+    <div id="score">Score: 0</div>
+    <canvas id="gameCanvas" width="640" height="480"></canvas>
+    <div id="game-over">
         <h2>Game Over!</h2>
-        <p>Final Score: <span id=\"final-score\">0</span></p>
-        <button onclick=\"resetGame()\">Play Again</button>
+        <p>Final Score: <span id="final-score">0</span></p>
+        <button onclick="resetGame()">Play Again</button>
     </div>
 
     <script>
@@ -68,8 +68,8 @@
             {x: 280, y: 240}
         ];
         let direction = 'right';
-        let moveQueue = [];
-        let lastProcessedDirection = 'right';
+        let lastValidDirection = 'right';
+        let nextDirection = 'right';
         let food = generateFood();
         let score = 0;
         let gameLoop;
@@ -103,10 +103,9 @@
         }
 
         function moveSnake() {
-            // Process next direction from queue
-            if (moveQueue.length > 0 && isValidMove(moveQueue[0], lastProcessedDirection)) {
-                direction = moveQueue.shift();
-                lastProcessedDirection = direction;
+            if (isValidMove(nextDirection, lastValidDirection)) {
+                direction = nextDirection;
+                lastValidDirection = direction;
             }
 
             const head = {x: snake[0].x, y: snake[0].y};
@@ -157,8 +156,8 @@
                 {x: 280, y: 240}
             ];
             direction = 'right';
-            lastProcessedDirection = 'right';
-            moveQueue = [];
+            lastValidDirection = 'right';
+            nextDirection = 'right';
             score = 0;
             document.getElementById('score').textContent = 'Score: 0';
             document.getElementById('game-over').style.display = 'none';
@@ -172,24 +171,10 @@
             if (gameOver) return;
             
             const key = event.key;
-            let newDirection = direction;
-
-            if (key === 'ArrowUp') newDirection = 'up';
-            else if (key === 'ArrowDown') newDirection = 'down';
-            else if (key === 'ArrowLeft') newDirection = 'left';
-            else if (key === 'ArrowRight') newDirection = 'right';
-            else return;
-
-            // Only add to queue if it's different from the last queued direction
-            if (moveQueue.length === 0) {
-                if (isValidMove(newDirection, lastProcessedDirection)) {
-                    moveQueue.push(newDirection);
-                }
-            } else if (newDirection !== moveQueue[moveQueue.length - 1]) {
-                if (isValidMove(newDirection, moveQueue[moveQueue.length - 1])) {
-                    moveQueue.push(newDirection);
-                }
-            }
+            if (key === 'ArrowUp') nextDirection = 'up';
+            else if (key === 'ArrowDown') nextDirection = 'down';
+            else if (key === 'ArrowLeft') nextDirection = 'left';
+            else if (key === 'ArrowRight') nextDirection = 'right';
         });
 
         resetGame();
